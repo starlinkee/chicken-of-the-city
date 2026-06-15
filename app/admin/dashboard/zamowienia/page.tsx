@@ -8,8 +8,6 @@ import LogoutButton from '../LogoutButton';
 import DashboardTabs from '../DashboardTabs';
 import { Suspense } from 'react';
 
-export const dynamic = 'force-dynamic';
-
 const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
 const PAGE_SIZE = 20;
 

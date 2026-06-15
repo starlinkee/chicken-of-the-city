@@ -8,8 +8,6 @@ import LogoutButton from './LogoutButton';
 import CustomerSection from './CustomerSection';
 import DashboardTabs from './DashboardTabs';
 
-export const dynamic = 'force-dynamic';
-
 const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
 
 function getWarsawHour(dateStr: string): number {

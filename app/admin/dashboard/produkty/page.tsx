@@ -8,8 +8,6 @@ import LogoutButton from '../LogoutButton';
 import DashboardTabs from '../DashboardTabs';
 import ProductyClient from './ProductyClient';
 
-export const dynamic = 'force-dynamic';
-
 export default async function ProduktPage() {
   const hdrs = await headers();
   const clientSlug = hdrs.get('x-client-slug') ?? process.env.DEFAULT_CLIENT_SLUG ?? 'default';
