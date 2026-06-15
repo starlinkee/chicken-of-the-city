@@ -6,6 +6,9 @@ import { usePathname } from 'next/navigation';
 const TABS = [
   { label: 'Statystyki', href: '/admin/dashboard' },
   { label: 'Zamówienia', href: '/admin/dashboard/zamowienia' },
+  { label: 'Produkty', href: '/admin/dashboard/produkty' },
+  { label: 'Kategorie', href: '/admin/dashboard/kategorie' },
+  { label: 'Ustawienia', href: '/admin/dashboard/ustawienia' },
 ];
 
 export default function DashboardTabs() {
