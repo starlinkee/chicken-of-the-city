@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { db } from '@/lib/db';
 import { orders } from '@/lib/db/schema';
 import { eq, and, or, ilike, gte, lte, desc } from 'drizzle-orm';

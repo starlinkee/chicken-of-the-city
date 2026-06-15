@@ -4,7 +4,7 @@ import { getAllCategories, getAllProducts, getBrandSettings } from '@/lib/querie
 const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
 import ProductCard from '@/components/ProductCard';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Menu',

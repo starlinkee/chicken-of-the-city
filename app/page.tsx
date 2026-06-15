@@ -5,7 +5,7 @@ const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
 import ProductCard from '@/components/ProductCard';
 import InteractiveMenu from '@/components/InteractiveMenu';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
