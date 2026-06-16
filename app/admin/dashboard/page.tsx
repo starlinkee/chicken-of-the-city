@@ -3,12 +3,11 @@ export const dynamic = 'force-dynamic';
 import { db } from '@/lib/db';
 import { orders, orderItems } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { headers } from 'next/headers';
 import Charts from './Charts';
 import LogoutButton from './LogoutButton';
 import CustomerSection from './CustomerSection';
 import DashboardTabs from './DashboardTabs';
-
-const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
 
 function getWarsawHour(dateStr: string): number {
   const h = parseInt(
@@ -21,20 +20,20 @@ function getWarsawWeekday(dateStr: string): string {
   return new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Warsaw', weekday: 'short' }).format(new Date(dateStr));
 }
 
-async function getStats() {
+async function getStats(clientSlug: string) {
   const [ordersData, itemsData] = await Promise.all([
     db.select({
       amountTotal: orders.amountTotal,
       createdAt: orders.createdAt,
       customerEmail: orders.customerEmail,
       customerName: orders.customerName,
-    }).from(orders).where(eq(orders.clientSlug, DEFAULT_CLIENT_SLUG)),
+    }).from(orders).where(eq(orders.clientSlug, clientSlug)),
     db.select({
       orderId: orderItems.orderId,
       productName: orderItems.productName,
       quantity: orderItems.quantity,
       unitPrice: orderItems.unitPrice,
-    }).from(orderItems).innerJoin(orders, eq(orderItems.orderId, orders.id)).where(eq(orders.clientSlug, DEFAULT_CLIENT_SLUG)),
+    }).from(orderItems).innerJoin(orders, eq(orderItems.orderId, orders.id)).where(eq(orders.clientSlug, clientSlug)),
   ]);
 
   const today = new Date().toISOString().slice(0, 10);
@@ -218,7 +217,9 @@ function KpiCard({ label, value, trend }: { label: string; value: string; trend?
 }
 
 export default async function DashboardPage() {
-  const stats = await getStats();
+  const hdrs = await headers();
+  const clientSlug = hdrs.get('x-client-slug') ?? process.env.DEFAULT_CLIENT_SLUG ?? 'default';
+  const stats = await getStats(clientSlug);
   const { kpi, dailyData, monthlyData, topProducts, peakHours, peakDays, customerStats, topCustomers, popularBundles } = stats;
 
   return (

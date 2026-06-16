@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { getAllCategories, getAllProducts, getBrandSettings } from '@/lib/queries';
-
-const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
 import ProductCard from '@/components/ProductCard';
 import InteractiveMenu from '@/components/InteractiveMenu';
 
@@ -12,10 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
+  const hdrs = await headers();
+  const clientSlug = hdrs.get('x-client-slug') ?? process.env.DEFAULT_CLIENT_SLUG ?? 'default';
+
   const [categories, products, brand] = await Promise.all([
-    getAllCategories(DEFAULT_CLIENT_SLUG),
-    getAllProducts(DEFAULT_CLIENT_SLUG),
-    getBrandSettings(DEFAULT_CLIENT_SLUG),
+    getAllCategories(clientSlug),
+    getAllProducts(clientSlug),
+    getBrandSettings(clientSlug),
   ]);
 
   const featuredProducts = products.slice(0, 3);

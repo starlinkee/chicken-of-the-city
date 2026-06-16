@@ -6,20 +6,18 @@ import { db } from '@/lib/db';
 import { orders, orderItems, settings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-// For now using a single tenant slug from env (dev mode).
-// In multi-tenant setup this would be resolved from the hostname.
-const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
-
 function fillTemplate(template: string, vars: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? `{${key}}`);
 }
 
 export async function POST(request: NextRequest) {
+  const clientSlug = request.headers.get('x-client-slug') ?? process.env.DEFAULT_CLIENT_SLUG ?? 'default';
+
   // Resolve per-tenant Stripe keys (fall back to env vars for dev)
   const tenantSettings = await db
     .select()
     .from(settings)
-    .where(eq(settings.clientSlug, DEFAULT_CLIENT_SLUG))
+    .where(eq(settings.clientSlug, clientSlug))
     .limit(1)
     .then(r => r[0] ?? null);
 
@@ -89,7 +87,7 @@ export async function POST(request: NextRequest) {
         const inserted = await db
           .insert(orders)
           .values({
-            clientSlug: DEFAULT_CLIENT_SLUG,
+            clientSlug,
             orderNumber: orderId,
             stripeSessionId,
             customerName,
@@ -131,8 +129,8 @@ export async function POST(request: NextRequest) {
       let emailSettings, restaurantInfo;
       try {
         [emailSettings, restaurantInfo] = await Promise.all([
-          getEmailSettings(DEFAULT_CLIENT_SLUG),
-          getRestaurantInfo(DEFAULT_CLIENT_SLUG),
+          getEmailSettings(clientSlug),
+          getRestaurantInfo(clientSlug),
         ]);
       } catch (err) {
         console.error('[webhook] Błąd pobierania ustawień:', err);

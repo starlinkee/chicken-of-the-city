@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
+import { headers } from 'next/headers';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -9,7 +10,10 @@ import { CartProvider } from '@/context/CartContext';
 import { getRestaurantInfo, getSeoSettings, getBrandSettings } from '@/lib/queries';
 import type { BrandSettings, RestaurantInfo } from '@/lib/queries';
 
-const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
+async function getClientSlug(): Promise<string> {
+  const hdrs = await headers();
+  return hdrs.get('x-client-slug') ?? process.env.DEFAULT_CLIENT_SLUG ?? 'default';
+}
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -37,7 +41,8 @@ const INFO_FALLBACK: RestaurantInfo = {
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const seo = await getSeoSettings(DEFAULT_CLIENT_SLUG);
+    const clientSlug = await getClientSlug();
+    const seo = await getSeoSettings(clientSlug);
     return {
       metadataBase: new URL(BASE_URL),
       title: {
@@ -81,9 +86,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const clientSlug = await getClientSlug();
   const [info, brand] = await Promise.all([
-    getRestaurantInfo(DEFAULT_CLIENT_SLUG).catch(() => INFO_FALLBACK),
-    getBrandSettings(DEFAULT_CLIENT_SLUG).catch(() => BRAND_FALLBACK),
+    getRestaurantInfo(clientSlug).catch(() => INFO_FALLBACK),
+    getBrandSettings(clientSlug).catch(() => BRAND_FALLBACK),
   ]);
 
   return (

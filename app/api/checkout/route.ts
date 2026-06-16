@@ -5,8 +5,6 @@ import { db } from '@/lib/db';
 import { settings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
-
 interface CartItemInput {
   id: string;
   quantity: number;
@@ -14,11 +12,13 @@ interface CartItemInput {
 }
 
 export async function POST(request: NextRequest) {
+  const clientSlug = request.headers.get('x-client-slug') ?? process.env.DEFAULT_CLIENT_SLUG ?? 'default';
+
   // Per-tenant Stripe key (falls back to env for dev)
   const tenantSettings = await db
     .select()
     .from(settings)
-    .where(eq(settings.clientSlug, DEFAULT_CLIENT_SLUG))
+    .where(eq(settings.clientSlug, clientSlug))
     .limit(1)
     .then(r => r[0] ?? null);
 
@@ -53,8 +53,8 @@ export async function POST(request: NextRequest) {
   let restaurantInfo;
   try {
     [products, restaurantInfo] = await Promise.all([
-      getAllProducts(DEFAULT_CLIENT_SLUG),
-      getRestaurantInfo(DEFAULT_CLIENT_SLUG),
+      getAllProducts(clientSlug),
+      getRestaurantInfo(clientSlug),
     ]);
   } catch {
     return Response.json({ error: 'Błąd pobierania menu.' }, { status: 502 });

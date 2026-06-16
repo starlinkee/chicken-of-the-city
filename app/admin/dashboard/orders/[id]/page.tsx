@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic';
 
 import { db } from '@/lib/db';
 import { orders, orderItems } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -12,13 +13,18 @@ function fmt(amount: number) {
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const hdrs = await headers();
+  const clientSlug = hdrs.get('x-client-slug') ?? process.env.DEFAULT_CLIENT_SLUG ?? 'default';
 
-  const [orderRows, items] = await Promise.all([
-    db.select().from(orders).where(eq(orders.id, id)).limit(1),
-    db.select().from(orderItems).where(eq(orderItems.orderId, id)),
-  ]);
+  const orderRows = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.id, id), eq(orders.clientSlug, clientSlug)))
+    .limit(1);
 
   if (!orderRows[0]) notFound();
+
+  const items = await db.select().from(orderItems).where(eq(orderItems.orderId, id));
 
   const order = orderRows[0];
   const itemsTotal = items.reduce((s, i) => s + i.quantity * Number(i.unitPrice), 0);

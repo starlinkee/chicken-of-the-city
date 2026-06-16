@@ -201,7 +201,7 @@ order_items {
   - tworzy rekord w `clients`
   - hashuje i zapisuje hasło admina w `client_auth`
   - tworzy domyślny rekord w `settings` (puste pola do uzupełnienia)
-- [ ] 3.2 Zaktualizować middleware — lookup tenanta z agency-platform przez hostname, ustawienie kontekstu
+- [x] 3.2 Zaktualizować middleware — lookup tenanta z agency-platform przez hostname, ustawienie kontekstu
 
 ### Etap 4: Migracja danych produktowych (usunięcie DatoCMS)
 - [ ] 4.1 Zastąpić `src/lib/datocms.ts` przez `src/lib/queries.ts` — funkcje pobierające dane z Neon

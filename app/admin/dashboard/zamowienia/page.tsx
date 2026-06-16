@@ -3,15 +3,16 @@ export const dynamic = 'force-dynamic';
 import { db } from '@/lib/db';
 import { orders } from '@/lib/db/schema';
 import { eq, and, or, ilike, gte, lte, desc } from 'drizzle-orm';
+import { headers } from 'next/headers';
 import OrdersTable from '../OrdersTable';
 import LogoutButton from '../LogoutButton';
 import DashboardTabs from '../DashboardTabs';
 import { Suspense } from 'react';
 
-const DEFAULT_CLIENT_SLUG = process.env.DEFAULT_CLIENT_SLUG ?? 'default';
 const PAGE_SIZE = 20;
 
 async function getOrders(
+  clientSlug: string,
   query: string,
   page: number,
   status: string,
@@ -22,7 +23,7 @@ async function getOrders(
 ) {
   const offset = (page - 1) * PAGE_SIZE;
 
-  const conditions = [eq(orders.clientSlug, DEFAULT_CLIENT_SLUG)];
+  const conditions = [eq(orders.clientSlug, clientSlug)];
 
   if (query) {
     conditions.push(
@@ -85,7 +86,10 @@ export default async function ZamowieniaPage({
   const { q = '', page: pageStr = '1', status = '', amountMin = '', amountMax = '', dateFrom = '', dateTo = '' } = await searchParams;
   const page = Math.max(1, parseInt(pageStr) || 1);
 
-  const { orders: ordersData, total } = await getOrders(q, page, status, amountMin, amountMax, dateFrom, dateTo);
+  const hdrs = await headers();
+  const clientSlug = hdrs.get('x-client-slug') ?? process.env.DEFAULT_CLIENT_SLUG ?? 'default';
+
+  const { orders: ordersData, total } = await getOrders(clientSlug, q, page, status, amountMin, amountMax, dateFrom, dateTo);
 
   return (
     <div className="min-h-screen bg-zinc-50">
